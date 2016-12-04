@@ -3,6 +3,7 @@ var router = express.Router();
 var movies = [
     { name : 'Oceans Eleven'},
     { name : 'Guardians of the Galaxy'},
+    { name : 'Galaxy Quest'},
     { name : 'Pacific Rim'}
 ]
 
@@ -10,7 +11,7 @@ router.get('/', function(req, res) {
     if(req.query.name) {
         var result = [];
         movies.forEach(function(value) {
-            if(value.name === req.query.name) {
+            if(value.name.includes(req.query.name)) {
                 result.push(value);
             }
         });
