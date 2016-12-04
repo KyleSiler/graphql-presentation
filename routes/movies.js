@@ -21,12 +21,13 @@ router.get('/', function(req, res) {
 });
 
 router.get('/:movie', function(req, res) {
+    var result = null;
     movies.forEach(function (value) {
         if(value.name === req.params.movie) {
-            res.json(value);
+            result = value;
         }
     });
-    res.json(null);
+    res.json(result);
 });
 
 module.exports = router
