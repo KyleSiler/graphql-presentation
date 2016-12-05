@@ -12,7 +12,9 @@ router.get('/', function(req, res) {
         movies.forEach(function(value) {
             var match = true;
             keys.forEach(function(key) {
-                if(!value[key] || !value[key].includes(req.query[key])) {
+                if(!value[key] || (!Array.isArray(value[key]) && !value[key].includes(req.query[key]))) {
+                    match = false;
+                } else if (Array.isArray(value[key]) && value[key].lastIndexOf(req.query[key]) === -1) {
                     match = false;
                 }
             });
