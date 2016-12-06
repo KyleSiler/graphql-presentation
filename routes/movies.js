@@ -50,7 +50,7 @@ var buildActorLink = function(req, actorName) {
 }
 
 router.get('/:movie', function(req, res) {
-    var result = movies[req.params.movie];
+    var result = JSON.parse(JSON.stringify(movies[req.params.movie]));
     result.actors = buildMovieLink(req, result.title) + '/actors';
     result.self = buildMovieLink(req, result.title);
     res.json(result);
@@ -59,7 +59,7 @@ router.get('/:movie', function(req, res) {
 router.get('/:movie/actors', function(req, res) {
     var result = [];
     movies[req.params.movie].actors.forEach(function(value) {
-        result.push(actors[value]);
+        result.push(JSON.parse(JSON.stringify(actors[value])));
     });
 
     result.forEach(function(actor) {
