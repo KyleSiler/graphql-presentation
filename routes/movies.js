@@ -1,55 +1,73 @@
 var express = require('express');
 var router = express.Router();
 var movies = require('./../databases/movies_db');
+var actors = require('./../databases/actors_db');
 
 router.get('/', function(req, res) {
-    var result = JSON.parse(JSON.stringify(movies));
+    var result = [];
     var keys = Object.keys(req.query);
-    console.log(keys);
 
-    if(keys) {
-        result = [];
-        movies.forEach(function(value) {
-            var match = true;
-            keys.forEach(function(key) {
-                if(!value[key] || (!Array.isArray(value[key]) && !value[key].includes(req.query[key]))) {
-                    match = false;
-                } else if (Array.isArray(value[key]) && value[key].lastIndexOf(req.query[key]) === -1) {
-                    match = false;
-                }
-            });
-
-            if(match) {
-                var copyOfMovie = JSON.parse(JSON.stringify(value));
-                result.push(copyOfMovie);
+    Object.keys(movies).forEach(function(movieKey) {
+        var match = true;
+        keys.forEach(function(key) {
+            if(!movies[movieKey][key] || (!Array.isArray(movies[movieKey][key]) && !movies[movieKey][key].includes(req.query[key]))) {
+                match = false;
+            } else if (Array.isArray(movies[movieKey][key]) && containsKey(movies[movieKey][key], req.query[key]) == false) {
+                match = false;
             }
         });
-    }
 
-    result.forEach(function (value) {
-        value.actors = buildMovieLink(req, value.name) + '/actors';
+        if(match) {
+            var copyOfMovie = JSON.parse(JSON.stringify(movies[movieKey]));
+            result.push(copyOfMovie);
+        }
+    });
+
+    result.forEach(function (movie) {
+        movie.actors = buildMovieLink(req, movie.title) + '/actors';
+        movie.self = buildMovieLink(req, movie.title);
     });
 
     res.json(result);
 });
+
+var containsKey = function(array, key) {
+    var hasMatch = false;
+    array.forEach(function(value) {
+        if(value.includes(key)) {
+            hasMatch = true;
+        }
+    });
+    return hasMatch;
+}
 
 var buildMovieLink = function(req, movieName) {
     return req.protocol + "://" + req.get('host') + req.baseUrl + '/' + encodeURIComponent(movieName);
 }
 
+var buildActorLink = function(req, actorName) {
+    return req.protocol + "://" + req.get('host') + '/actors/' + encodeURIComponent(actorName);
+}
+
 router.get('/:movie', function(req, res) {
-    var result = null;
-    movies.forEach(function (value) {
-        if(value.name === req.params.movie) {
-            result = value;
-        }
-    });
-    result.actors = buildMovieLink(req, result.name) + '/actors';
+    var result = movies[req.params.movie];
+    result.actors = buildMovieLink(req, result.title) + '/actors';
+    result.self = buildMovieLink(req, result.title);
     res.json(result);
 });
 
 router.get('/:movie/actors', function(req, res) {
-    res.json({ name : 'Heres an actor' });
+    var result = [];
+    movies[req.params.movie].actors.forEach(function(value) {
+        result.push(actors[value]);
+    });
+
+    result.forEach(function(actor) {
+        actor.self = buildActorLink(req, actor.name);
+        actor.movies = buildActorLink(req, actor.name) + '/movies';
+    });
+
+    res.json(result);
 });
 
 module.exports = router
