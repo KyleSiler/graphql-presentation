@@ -4,7 +4,13 @@ var movies = require('./routes/movies');
 var actors = require('./routes/actors');
 
 app.get('/', function(req, res) {
-	res.send('Hello World!');
+	var baseUrl = req.protocol + "://" + req.get('host');
+	var result = {
+		movies : baseUrl + '/movies',
+		actors : baseUrl + '/actors'
+	};
+
+	res.json(result);
 });
 
 app.use('/movies', movies);
