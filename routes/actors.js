@@ -61,7 +61,8 @@ router.get('/:actor', function(req, res) {
 
 router.get('/:actor/movies', function(req, res) {
     var result = [];
-
+    console.log(req.params.actor);
+    console.log(actors[req.params.actor]);
     actors[req.params.actor].movies.forEach(function(movie) {
         result.push(movies[movie]);
     });

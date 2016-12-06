@@ -16,7 +16,6 @@ app.get('/', function(req, res) {
 app.use('/movies', movies);
 app.use('/actors', actors);
 
-
 app.listen(process.env.PORT || 8080, function() {
 	console.log('Starting server');
 });
