@@ -1,17 +1,6 @@
 var express = require('express');
 var router = express.Router();
-var actors = require('./../databases/actors_db.js');
-var movies = require('./../databases/movies_db.js');
-
-var containsKey = function(array, key) {
-    var hasMatch = false;
-    array.forEach(function(value) {
-        if(value.includes(key)) {
-            hasMatch = true;
-        }
-    });
-    return hasMatch;
-}
+var actors_dao = require('./../daos/actors_dao');
 
 var buildMovieLink = function(req, movieName) {
     return req.protocol + "://" + req.get('host') + '/movies/' + encodeURIComponent(movieName);
@@ -22,25 +11,7 @@ var buildActorLink = function(req, actorName) {
 }
 
 router.get('/', function(req, res) {
-    var result = [];
-
-    var queryParams = Object.keys(req.query);
-
-    Object.keys(actors).forEach(function(actorName) {
-        var match = true;
-        queryParams.forEach(function(key) {
-            if(!actors[actorName][key] || (!Array.isArray(actors[actorName][key]) && !actors[actorName][key].includes(req.query[key]))) {
-                match = false;
-            } else if (Array.isArray(actors[actorName][key]) && containsKey(actors[actorName][key], req.query[key]) == false) {
-                match = false;
-            }
-        });
-
-        if(match) {
-            var copyOfactor = JSON.parse(JSON.stringify(actors[actorName]));
-            result.push(copyOfactor);
-        }
-    });
+    var result = actors_dao.getAllActors(req.query);
 
     result.forEach(function(actor) {
         actor.self = buildActorLink(req, actor.name);
@@ -51,7 +22,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/:actor', function(req, res) {
-    var result = JSON.parse(JSON.stringify(actors[req.params.actor]));
+    var result = actors_dao.getActorByName(req.params.actor);
 
     result.self = buildActorLink(req, result.name);
     result.movies = buildActorLink(req, result.name) + '/movies';
@@ -60,12 +31,7 @@ router.get('/:actor', function(req, res) {
 });
 
 router.get('/:actor/movies', function(req, res) {
-    var result = [];
-    console.log(req.params.actor);
-    console.log(actors[req.params.actor]);
-    actors[req.params.actor].movies.forEach(function(movie) {
-        result.push(JSON.parse(JSON.stringify(movies[movie])));
-    });
+    var result = actors_dao.getMoviesByActor(req.params.actor);
 
     result.forEach(function(movie) {
         movie.self = buildMovieLink(req, movie.title);

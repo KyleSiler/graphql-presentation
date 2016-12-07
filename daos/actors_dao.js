@@ -1,17 +1,18 @@
-var movies = require('./../databases/movies_db');
 var actors = require('./../databases/actors_db');
+var movies = require('./../databases/movies_db');
 
 var dao = {
-    getAllMovies : function (query) {
+    getAllActors : function(query) {
+        var result = [];
         var queryParams = Object.keys(query);
 
-        var result = Object.keys(movies)
-            .map(function(movieKey) { return movies[movieKey];})
-            .filter(function(movie) {
+        var result = Object.keys(actors)
+            .map(function(actorKey) { return actors[actorKey];})
+            .filter(function(actor) {
                 return queryParams.reduce(function(accumulator, param) {
-                    if(!movie[param] || (!Array.isArray(movie[param]) && !movie[param].includes(query[param]))) {
+                    if(!actor[param] || (!Array.isArray(actor[param]) && !actor[param].includes(query[param]))) {
                         return false;
-                    } else if (Array.isArray(movie[param]) && containsKey(movie[param], query[param]) == false) {
+                    } else if (Array.isArray(actor[param]) && containsKey(actor[param], query[param]) == false) {
                         return false;
                     }
                     return true && accumulator;
@@ -22,17 +23,16 @@ var dao = {
 
         return result;
     },
-    getMovieByTitle : function (title) {
-        return JSON.parse(JSON.stringify(movies[title]));
+    getActorByName : function (name) {
+        return JSON.parse(JSON.stringify(actors[name]));
     },
-    getActorsByMovie : function(title) {
+    getMoviesByActor : function(name) {
         var result = [];
         
-        movies[title].actors
-            .map(function(actorName) {
-                result.push(JSON.parse(JSON.stringify(actors[actorName])));
+        actors[name].movies
+            .map(function(title) {
+                result.push(JSON.parse(JSON.stringify(movies[title])));
             });
-
         return result;
     }
 }

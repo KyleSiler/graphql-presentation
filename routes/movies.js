@@ -1,15 +1,9 @@
 var express = require('express');
 var router = express.Router();
-var movies = require('./../databases/movies_db');
-var actors = require('./../databases/actors_db');
-var movie_dao = require('./../daos/movies_dao');
+var movies_dao = require('./../daos/movies_dao');
 
 router.get('/', function(req, res) {
-    var result = [];
-
-    var queryParams = req.query;
-
-    result = movie_dao.getAllMovies(queryParams);
+    var result = movies_dao.getAllMovies(req.query);
 
     result.map(function (movie) {
         movie.actors = buildMovieLink(req, movie.title) + '/actors';
@@ -21,17 +15,14 @@ router.get('/', function(req, res) {
 });
 
 router.get('/:movie', function(req, res) {
-    var result = JSON.parse(JSON.stringify(movies[req.params.movie]));
+    var result = movies_dao.getMovieByTitle(req.params.movie);
     result.actors = buildMovieLink(req, result.title) + '/actors';
     result.self = buildMovieLink(req, result.title);
     res.json(result);
 });
 
 router.get('/:movie/actors', function(req, res) {
-    var result = [];
-    movies[req.params.movie].actors.forEach(function(value) {
-        result.push(JSON.parse(JSON.stringify(actors[value])));
-    });
+    var result = movies_dao.getActorsByMovie(req.params.movie);
 
     result.forEach(function(actor) {
         actor.self = buildActorLink(req, actor.name);
