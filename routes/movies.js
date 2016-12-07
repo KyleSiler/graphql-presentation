@@ -2,52 +2,23 @@ var express = require('express');
 var router = express.Router();
 var movies = require('./../databases/movies_db');
 var actors = require('./../databases/actors_db');
+var movie_dao = require('./../daos/movies_dao');
 
 router.get('/', function(req, res) {
     var result = [];
-    var keys = Object.keys(req.query);
 
-    Object.keys(movies).forEach(function(movieKey) {
-        var match = true;
-        keys.forEach(function(key) {
-            if(!movies[movieKey][key] || (!Array.isArray(movies[movieKey][key]) && !movies[movieKey][key].includes(req.query[key]))) {
-                match = false;
-            } else if (Array.isArray(movies[movieKey][key]) && containsKey(movies[movieKey][key], req.query[key]) == false) {
-                match = false;
-            }
-        });
+    var queryParams = req.query;
 
-        if(match) {
-            var copyOfMovie = JSON.parse(JSON.stringify(movies[movieKey]));
-            result.push(copyOfMovie);
-        }
-    });
+    result = movie_dao.getAllMovies(queryParams);
 
-    result.forEach(function (movie) {
+    result.map(function (movie) {
         movie.actors = buildMovieLink(req, movie.title) + '/actors';
         movie.self = buildMovieLink(req, movie.title);
+        return movie;
     });
 
     res.json(result);
 });
-
-var containsKey = function(array, key) {
-    var hasMatch = false;
-    array.forEach(function(value) {
-        if(value.includes(key)) {
-            hasMatch = true;
-        }
-    });
-    return hasMatch;
-}
-
-var buildMovieLink = function(req, movieName) {
-    return req.protocol + "://" + req.get('host') + req.baseUrl + '/' + encodeURIComponent(movieName);
-}
-
-var buildActorLink = function(req, actorName) {
-    return req.protocol + "://" + req.get('host') + '/actors/' + encodeURIComponent(actorName);
-}
 
 router.get('/:movie', function(req, res) {
     var result = JSON.parse(JSON.stringify(movies[req.params.movie]));
@@ -69,5 +40,13 @@ router.get('/:movie/actors', function(req, res) {
 
     res.json(result);
 });
+
+var buildMovieLink = function(req, movieName) {
+    return req.protocol + "://" + req.get('host') + req.baseUrl + '/' + encodeURIComponent(movieName);
+}
+
+var buildActorLink = function(req, actorName) {
+    return req.protocol + "://" + req.get('host') + '/actors/' + encodeURIComponent(actorName);
+}
 
 module.exports = router
