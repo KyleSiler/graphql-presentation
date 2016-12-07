@@ -1,50 +1,29 @@
-var movies = require('./../databases/movies_db');
-var actors = require('./../databases/actors_db');
+var movies_db = require('./../databases/movies_db');
+var actors_db = require('./../databases/actors_db');
+var filters = require('./../filters');
 
 var dao = {
     getAllMovies : function (query) {
-        var queryParams = Object.keys(query);
-
-        var result = Object.keys(movies)
-            .map(function(movieKey) { return movies[movieKey];})
-            .filter(function(movie) {
-                return queryParams.reduce(function(accumulator, param) {
-                    if(!movie[param] || (!Array.isArray(movie[param]) && !movie[param].includes(query[param]))) {
-                        return false;
-                    } else if (Array.isArray(movie[param]) && containsKey(movie[param], query[param]) == false) {
-                        return false;
-                    }
-                    return true && accumulator;
-                }, true);
-            })
-            .map(JSON.stringify)
-            .map(JSON.parse);
+        var result = filters.filterMovieByQuery(Object.keys(movies_db)
+            .map(function(movieKey) { return movies_db[movieKey];}), query);
 
         return result;
     },
     getMovieByTitle : function (title) {
-        return JSON.parse(JSON.stringify(movies[title]));
+        return JSON.parse(JSON.stringify(movies_db[title]));
     },
-    getActorsByMovie : function(title) {
+    getActorsByMovie : function(title, query) {
         var result = [];
         
-        movies[title].actors
+        movies_db[title].actors
             .map(function(actorName) {
-                result.push(JSON.parse(JSON.stringify(actors[actorName])));
+                result.push(JSON.parse(JSON.stringify(actors_db[actorName])));
             });
+        
+        result = filters.filterActorsByQuery(result, query);
 
         return result;
     }
-}
-
-var containsKey = function(array, key) {
-    var hasMatch = false;
-    array.forEach(function(value) {
-        if(value.includes(key)) {
-            hasMatch = true;
-        }
-    });
-    return hasMatch;
 }
 
 module.exports = dao;

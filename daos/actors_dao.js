@@ -1,50 +1,29 @@
-var actors = require('./../databases/actors_db');
-var movies = require('./../databases/movies_db');
+var actors_db = require('./../databases/actors_db');
+var movies_db = require('./../databases/movies_db');
+var filters = require('./../filters');
 
 var dao = {
     getAllActors : function(query) {
-        var result = [];
-        var queryParams = Object.keys(query);
-
-        var result = Object.keys(actors)
-            .map(function(actorKey) { return actors[actorKey];})
-            .filter(function(actor) {
-                return queryParams.reduce(function(accumulator, param) {
-                    if(!actor[param] || (!Array.isArray(actor[param]) && !actor[param].includes(query[param]))) {
-                        return false;
-                    } else if (Array.isArray(actor[param]) && containsKey(actor[param], query[param]) == false) {
-                        return false;
-                    }
-                    return true && accumulator;
-                }, true);
-            })
-            .map(JSON.stringify)
-            .map(JSON.parse);
+        var result = filters.filterActorsByQuery(Object.keys(actors_db)
+            .map(function(actorName) { return actors_db[actorName];}), query);
 
         return result;
     },
     getActorByName : function (name) {
-        return JSON.parse(JSON.stringify(actors[name]));
+        return JSON.parse(JSON.stringify(actors_db[name]));
     },
-    getMoviesByActor : function(name) {
+    getMoviesByActor : function(name, query) {
         var result = [];
         
-        actors[name].movies
+        actors_db[name].movies
             .map(function(title) {
-                result.push(JSON.parse(JSON.stringify(movies[title])));
+                result.push(JSON.parse(JSON.stringify(movies_db[title])));
             });
+        
+        result = filters.filterMovieByQuery(result, query);
+
         return result;
     }
-}
-
-var containsKey = function(array, key) {
-    var hasMatch = false;
-    array.forEach(function(value) {
-        if(value.includes(key)) {
-            hasMatch = true;
-        }
-    });
-    return hasMatch;
 }
 
 module.exports = dao;

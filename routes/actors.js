@@ -31,7 +31,7 @@ router.get('/:actor', function(req, res) {
 });
 
 router.get('/:actor/movies', function(req, res) {
-    var result = actors_dao.getMoviesByActor(req.params.actor);
+    var result = actors_dao.getMoviesByActor(req.params.actor, req.query);
 
     result.forEach(function(movie) {
         movie.self = buildMovieLink(req, movie.title);
