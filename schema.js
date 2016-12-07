@@ -47,6 +47,7 @@ var MovieType = new graphql.GraphQLObjectType({
 
 var ActorType = new graphql.GraphQLObjectType({
     name : 'actor',
+    isIntrospection : true,
     fields: function() {
         return {
             name : {
