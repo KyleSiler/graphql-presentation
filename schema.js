@@ -184,8 +184,10 @@ var MutationSetMessage = {
     }
   },
   resolve: function(root, value) {
-      if(value.key === 'Ooze') {
+      if((value.key === 'Planeteers' && mutationMessage === 'Initial message') || value.key === 'reset') {
         mutationMessage = value.message;
+      } else {
+          return "Stop trying to sabotage my presentation";
       }
       return mutationMessage;
   }
