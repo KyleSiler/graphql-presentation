@@ -12,6 +12,9 @@ var MovieType = new graphql.GraphQLObjectType({
             year : {
                 type : graphql.GraphQLString
             },
+            description : {
+                type : graphql.GraphQLString
+            },
             directors : {
                 type : new graphql.GraphQLList(graphql.GraphQLString)
             },
@@ -71,6 +74,9 @@ var ActorType = new graphql.GraphQLObjectType({
                         type: graphql.GraphQLString,
                         description: "Director of the movie",
                     },
+                    description : {
+                        type : graphql.GraphQLString
+                    },
                     writers: {
                         type: graphql.GraphQLString,
                         description: "Writer of the movie",
@@ -111,6 +117,9 @@ var schemaObj = new graphql.GraphQLObjectType({
                     directors: {
                         type: graphql.GraphQLString,
                         description: "Director of the movie",
+                    },
+                    description : {
+                        type : graphql.GraphQLString
                     },
                     writers: {
                         type: graphql.GraphQLString,
