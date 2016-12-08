@@ -2,6 +2,8 @@ var graphql = require('graphql');
 var movies_dao = require('./daos/movies_dao');
 var actors_dao = require('./daos/actors_dao');
 
+var mutationMessage = "Initial message";
+
 var MovieType = new graphql.GraphQLObjectType({
     name : 'movie',
     fields: function() {
@@ -157,13 +159,48 @@ var schemaObj = new graphql.GraphQLObjectType({
                 resolve: function(_,args) {
                     return actors_dao.getAllActors(args);
                 }
+            },
+            getMessage : {
+                type : graphql.GraphQLString,
+                resolve : function(_, args) {
+                    return mutationMessage;
+                }
             }
         }
     }
 });
 
+var MutationSetMessage = {
+  type: graphql.GraphQLString,
+  description: 'Add a Message',
+  args: {
+    message: {
+      name: 'Message',
+      type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+    },
+    key : {
+        name : 'Key to unlock mutations',
+        type: new graphql.GraphQLNonNull(graphql.GraphQLString)
+    }
+  },
+  resolve: function(root, value) {
+      if(value.key === 'Ooze') {
+        mutationMessage = value.message;
+      }
+      return mutationMessage;
+  }
+};
+
+var mutations = new graphql.GraphQLObjectType({
+  name: 'Mutation',
+  fields: {
+    setMessage: MutationSetMessage
+  }
+});
+
 var Schema = new graphql.GraphQLSchema( {
-    query: schemaObj
+    query: schemaObj,
+    mutation : mutations
 });
 
 module.exports = Schema;
